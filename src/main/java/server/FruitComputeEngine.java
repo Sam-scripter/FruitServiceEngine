@@ -1,12 +1,12 @@
 package server;
 
-import shared.Compute;
-import shared.Task;
+import shared.Compute;  // Interface defining the remote execution method
+import shared.Task;     // Interface for tasks that can be executed remotely
 
-import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
-import java.rmi.server.UnicastRemoteObject;
+import java.rmi.RemoteException;                  // Exception for RMI-related issues
+import java.rmi.registry.LocateRegistry;          // Used to locate or create the RMI registry
+import java.rmi.registry.Registry;                // Reference to the RMI registry
+import java.rmi.server.UnicastRemoteObject;       // Allows exporting this server as a remote object
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,44 +16,51 @@ import java.util.Map;
  */
 public class FruitComputeEngine extends UnicastRemoteObject implements Compute {
 
-    // In-memory fruit-price table shared across tasks
+    /// Shared in-memory fruit-price table
+    /// Acts as the database for storing fruit name and price
     public static final Map<String, Double> fruitPriceTable = new HashMap<>();
 
+    /// Constructor exports the object for remote invocation
+
     protected FruitComputeEngine() throws RemoteException {
-        super();
+        super();  // Export this object as a remote object
     }
 
     /**
-     * Executes any task submitted through the RMI interface.
-     * @param t the task to execute
-     * @return the result of the task
-     * @throws RemoteException in case of network issues
+     * Executes a generic task submitted via RMI.
+     * Any class implementing Task<T> can be passed in and run here.
      */
     @Override
     public synchronized <T> T executeTask(Task<T> t) throws RemoteException {
-        return t.execute();
+        return t.execute();  // Run the task and return its result
     }
 
+    /**
+     * Main method: entry point for starting the RMI server.
+     * It loads stored fruit data, connects to the RMI registry, and binds this engine.
+     */
     public static void main(String[] args) {
         try {
-            // Load fruit data from JSON file before registration
+            /// Load fruits from JSON file into memory
             fruitPriceTable.putAll(PersistenceUtil.load());
             System.out.println("✅ Loaded fruits from file.");
 
-            // Optionally start the registry here (uncomment if needed)
-            // LocateRegistry.createRegistry(1099);
-
-            // Get registry and register the compute engine
+            /// Access the existing RMI registry (assumes `rmiregistry` is already running)
             System.out.println("Using existing RMI registry.");
-            FruitComputeEngine engine = new FruitComputeEngine();
-            Registry registry = LocateRegistry.getRegistry();
-            registry.rebind("FruitCompute", engine);
 
+            /// Create and export this compute engine
+            FruitComputeEngine engine = new FruitComputeEngine();
+
+            /// Get reference to the registry
+            Registry registry = LocateRegistry.getRegistry();
+
+            /// Bind this engine to the name "FruitCompute" for lookup by clients
+            registry.rebind("FruitCompute", engine);
             System.out.println("✅ FruitComputeEngine is ready and bound to 'FruitCompute'.");
 
         } catch (Exception e) {
             System.err.println("❌ Failed to start FruitComputeEngine:");
-            e.printStackTrace();
+            e.printStackTrace();  // Print detailed error to server logs
         }
     }
 }
