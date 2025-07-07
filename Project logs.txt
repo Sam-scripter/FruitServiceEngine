@@ -1,0 +1,41 @@
+1. Project Setup
+- Using IntelliJ IDEA as my IDE, I created a new Java Web Application  and named it FruitServiceEngine.
+
+2. RMI Server
+- created a package and named it "server".
+- created FruitComputeEngine.java in the package, the purpose of this file is to hold the fruit price table in memory, register itself with RMI registry and save/load data.
+- I also created task classes under a "tasks" directory located under this server package. These tasks include:
+	- AddFruitPrice.java: adds new fruits to file.
+	- UpdateFruitPrice.java: updates fruit price.
+	- DeleteFruitPrice.java: deletes a fruit.
+	- CalFruitCost.java: provides the cost of a given quantity of fruits
+	- CalculateCost.java: Prints a receipt with Cashier, amount and change information
+	- ListFruits.java: Returns all the fruits written in file with their prices.
+	- ListFruitNames.java: Returns the fruit names to dynamically populate dropdown menus in the User UI.
+
+3. Persistence Setup
+- Used GSON to save/load fruit names with their prices in json format to/from a file named fruit_data.json.
+- Used PersistenceUtil.java class to do this.
+
+4. RMI Communication
+- To connect to the registry and send tasks to the RMI server, we created FruitComputeTaskRegistry class in server.
+
+5. Web Layer (Client)
+- To handle submissions from the client web UI, we created the FruitServlet.java which handled various tasks from the web UI such as adding a fruit, updating a fruit, deleting a fruit, etc.
+- Also created FruitListServlet.java which returns a list of fruit names which populate dropdowns in the User Interface.
+
+6. User Interface(UI)
+- Using HTML, CSS and JavaScript, we created index.jsp which provides the user with a means to perform various actions in the system.
+- This file provides a form with a dropdown which dynamically updates the form according to the action selected.
+
+7. Problems and Fixes
+- Dropdown Rendering issue: The text being displayed in the dropdown was white on white and the values were therefore not being seen. Fixed this by styling select and option with black text while maintaining the white background.
+- port 1099 being used when trying to run FruitComputeEngine: we realized we had another instance of the rmiregistry being created in the FruitComputeEngine. Solved this by removing the instance in the file and running rmiregistry then FruitComputeEngine which now attaches itself to the now running rmiregistry.
+
+8. Build and Deployment
+- Created FruitServiceEngine:war exploded artifact in my IDE.
+- Configured Tomcat server to use this artifact when deploying.
+- Started rmiregistry from target/classes folder via the terminal.
+- Ran FruitComputeEngine (this starts the RMI server)
+- Ran the Tomcat Server which Deployed the web app to be accessed at:
+	http://localhost:8080/FruitServiceEngine_war_exploded/
